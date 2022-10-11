@@ -1,16 +1,24 @@
 const express = require('express');
+require('dotenv').config();
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');// здесь обрабатываем ошибки валидации celebrate
 const cors = require('cors');
 const userRouter = require('./src/routes/users');
-const cardRouter = require('./src/routes/movies');
+const movieRouter = require('./src/routes/movies');
+const limiter = require('./src/controllers/rateLimiter');
 const NotFoundError = require('./src/errors/not-found-err'); // 404
 const { requestLogger, errorLogger } = require('./src/middlewares/logger');
+const auth = require('./src/middlewares/auth');
+
+const { NODE_ENV, MONGO_SERVER } = process.env;
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
 const app = express();
+const serverBd = NODE_ENV === 'production' ? MONGO_SERVER : 'mongodb://localhost:27017/moviesdb';
 
+// подключаем rate-limiter
+app.use(limiter);
 // добавляем bodyParser по-новому
 app.use(express.json());
 
@@ -19,10 +27,10 @@ app.use(cors());
 
 app.use(requestLogger); // подключаем логгер запросов до обработчиков всех роутов
 // подключаем роутер
-app.use('/', cardRouter);
+app.use('/', movieRouter);
 app.use('/', userRouter);
 
-app.use((req, res, next) => {
+app.use(auth, (req, res, next) => {
   next(new NotFoundError('Неправильный путь'));
 });
 
@@ -38,7 +46,7 @@ app.use((err, req, res, next) => {
 });
 
 (async function main() {
-  await mongoose.connect('mongodb://localhost:27017/mestodb');
+  await mongoose.connect(serverBd);
   console.log('Connected to db');
 
   app.listen(PORT);

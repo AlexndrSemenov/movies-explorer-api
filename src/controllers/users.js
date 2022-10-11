@@ -4,13 +4,11 @@ const User = require('../models/user');
 const BadRequestError = require('../errors/bad-request-err'); // 400
 const NotFoundError = require('../errors/not-found-err'); // 404
 const AlreadExistsErr = require('../errors/already-exists-err'); // 409
-const AuthorizationError = require('../errors/authorization-err'); // 401
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 exports.createUser = (req, res, next) => { // регистрация пользователя
   const {
-    // email, name, about, avatar,
     email, name,
   } = req.body;
   bcrypt.hash(req.body.password, 10)
@@ -18,16 +16,12 @@ exports.createUser = (req, res, next) => { // регистрация польз�
       email,
       password: hash, // записываем хеш в базу
       name,
-      // about,
-      // avatar,
     }))
     .then((user) => {
       res.status(201).send({
         _id: user._id,
         email: user.email,
         name: user.name,
-        // about: user.about,
-        // avatar: user.avatar,
       });
     })
     .catch((err) => {
@@ -50,9 +44,7 @@ exports.login = (req, res, next) => { // аутентификация(вход �
       // вернём токен
       res.send({ token });
     })
-    .catch(() => {
-      next(new AuthorizationError('Неправильные логин или пароль'));
-    });
+    .catch(next);
 };
 
 exports.getUsersMe = (req, res, next) => User.findById(req.user._id)
@@ -67,10 +59,8 @@ exports.getUsersMe = (req, res, next) => User.findById(req.user._id)
   });
 
 exports.updateUserProfile = (req, res, next) => {
-  // const { name, about } = req.body;
   const { email, name } = req.body;
   const myId = req.user._id;
-  // User.findByIdAndUpdate(myId, { name, about }, { new: true, runValidators: true })
   User.findByIdAndUpdate(myId, { email, name }, { new: true, runValidators: true })
     .orFail(new Error('NotValididId'))
     .then((user) => res.send(user))
@@ -79,41 +69,10 @@ exports.updateUserProfile = (req, res, next) => {
         next(new NotFoundError('Пользователь с указанным _id не найден'));
       } else if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
+      } else if (err.code === 11000) {
+        next(new AlreadExistsErr('Невозможно изменить e-mail - данный e-mail уже зарегистрирован'));
       } else {
         next(err);
       }
     });
 };
-
-// exports.getUsers = (req, res, next) => User.find({})
-//   .then((users) => res.send({ data: users }))
-//   .catch(next);
-
-// exports.getUserById = (req, res, next) => User.findById(req.params.userId)
-//   .orFail(new Error('NotValididId'))
-//   .then((user) => res.send(user))
-//   .catch((err) => {
-//     if (err.message === 'NotValididId') {
-//       next(new NotFoundError('Пользователь с указанным _id не найден'));
-//     } else {
-//       next(err);
-//     }
-//   });
-
-// exports.updateUserAvatar = (req, res, next) => {
-//   const { avatar } = req.body;
-//   const myId = req.user._id;
-
-//   User.findByIdAndUpdate(myId, { avatar }, { new: true, runValidators: true })
-//     .orFail(new Error('NotValididId'))
-//     .then((user) => res.send(user))
-//     .catch((err) => {
-//       if (err.message === 'NotValididId') {
-//         next(new NotFoundError('Пользователь с указанным _id не найден'));
-//       } else if (err.name === 'ValidationError') {
-//         next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
-//       } else {
-//         next(err);
-//       }
-//     });
-// };
