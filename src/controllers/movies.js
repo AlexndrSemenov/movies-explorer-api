@@ -2,6 +2,7 @@ const Movie = require('../models/movie');
 const BadRequestError = require('../errors/bad-request-err'); // 400
 const NotFoundError = require('../errors/not-found-err'); // 404
 const AnotherCardErr = require('../errors/another-card-err'); // 403
+const { ERROR_DATA_CREATE_CARD, ALIEN_CARD, ERROR_ID_CARD } = require('../utils/constants');
 
 exports.createMovie = (req, res, next) => {
   const {
@@ -27,7 +28,7 @@ exports.createMovie = (req, res, next) => {
     .then((movie) => res.status(201).send(movie))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при создании карточки'));
+        next(new BadRequestError(ERROR_DATA_CREATE_CARD));
       } else {
         next(err);
       }
@@ -52,10 +53,10 @@ module.exports.deleteMovie = async (req, res, next) => {
           .then((movie) => res.send(movie))
           .catch(next);
       } else {
-        next(new AnotherCardErr('Невозможно удалить чужую карточку'));
+        next(new AnotherCardErr(ALIEN_CARD));
       }
     } else {
-      next(new NotFoundError('Передан некорректный id карточки'));
+      next(new NotFoundError(ERROR_ID_CARD));
     }
   } catch (err) { next(err); }
 };

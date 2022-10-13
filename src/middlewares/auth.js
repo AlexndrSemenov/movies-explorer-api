@@ -1,17 +1,13 @@
 const { NODE_ENV, JWT_SECRET } = process.env;
 const jwt = require('jsonwebtoken');
 const AuthorizationError = require('../errors/authorization-err');
+const { NEED_AUTORIZATION } = require('../utils/constants');
 
-const handleAuthError = () => {
-  throw new AuthorizationError('Необходима авторизация');
-};
-
-// eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return handleAuthError();
+    throw new AuthorizationError(NEED_AUTORIZATION);
   }
 
   const token = authorization.replace('Bearer ', '');
@@ -23,7 +19,7 @@ module.exports = (req, res, next) => {
       NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
     );
   } catch (err) {
-    return handleAuthError();
+    throw new AuthorizationError(NEED_AUTORIZATION);
   }
 
   req.user = payload; // записываем пейлоуд в объект запроса

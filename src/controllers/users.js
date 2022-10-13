@@ -4,6 +4,7 @@ const User = require('../models/user');
 const BadRequestError = require('../errors/bad-request-err'); // 400
 const NotFoundError = require('../errors/not-found-err'); // 404
 const AlreadExistsErr = require('../errors/already-exists-err'); // 409
+const { ERROR_DATA_USERS, ALREADY_REGISTERED, UNKNOUN_USER_ID } = require('../utils/constants');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -26,9 +27,9 @@ exports.createUser = (req, res, next) => { // регистрация польз�
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+        next(new BadRequestError(ERROR_DATA_USERS));
       } else if (err.code === 11000) {
-        next(new AlreadExistsErr('Данный емайл уже зарегистрирован'));
+        next(new AlreadExistsErr(ALREADY_REGISTERED));
       } else {
         next(err);
       }
@@ -52,7 +53,7 @@ exports.getUsersMe = (req, res, next) => User.findById(req.user._id)
   .then((user) => res.send(user))
   .catch((err) => {
     if (err.message === 'NotValididId') {
-      next(new NotFoundError('Пользователь по указанному _id не найден'));
+      next(new NotFoundError(UNKNOUN_USER_ID));
     } else {
       next(err);
     }
@@ -66,11 +67,11 @@ exports.updateUserProfile = (req, res, next) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.message === 'NotValididId') {
-        next(new NotFoundError('Пользователь с указанным _id не найден'));
+        next(new NotFoundError(UNKNOUN_USER_ID));
       } else if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
+        next(new BadRequestError(ERROR_DATA_USERS));
       } else if (err.code === 11000) {
-        next(new AlreadExistsErr('Невозможно изменить e-mail - данный e-mail уже зарегистрирован'));
+        next(new AlreadExistsErr(ALREADY_REGISTERED));
       } else {
         next(err);
       }
