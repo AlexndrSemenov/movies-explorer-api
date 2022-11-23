@@ -20,6 +20,6 @@ DELETE, /movies/_id
 
 Фронтэнд данной работы можно найти по адресу: https://github.com/AlexndrSemenov/movies-explorer-frontend
 
-Адрес размещения бэкэнда на сервере: api.alex.movies.nomoredomains.icu
+Адрес размещения бэкэнда на сервере: https://api.alex.movies.nomoredomains.icu
 
 Адрес размещения фронтенда на сервере: https://alex.movies.nomoredomains.icu
