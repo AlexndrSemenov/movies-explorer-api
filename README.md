@@ -23,3 +23,4 @@ DELETE, `/movies/_id`
 Адрес размещения бэкэнда на сервере: https://api.alex.movies.nomoredomains.icu
 
 Адрес размещения фронтенда на сервере: https://alex.movies.nomoredomains.icu
+ 
