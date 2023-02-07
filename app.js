@@ -13,7 +13,7 @@ const errorHandler = require('./src/middlewares/errorHandler');
 
 const { NODE_ENV, MONGO_SERVER } = process.env;
 const {
-  MONGO_SERVER_DEV, ALLOW_CORS, ERROR_PATH, CONNECTED_TO_DB, APP_LISTENING_ON,
+  MONGO_SERVER_DEV, ERROR_PATH, CONNECTED_TO_DB, APP_LISTENING_ON,
 } = require('./src/utils/constants');
 
 // Слушаем 3000 порт
@@ -31,7 +31,7 @@ app.use(limiter);
 app.use(express.json());
 
 // разрешаем кроссдоменные запросы
-app.use(cors(ALLOW_CORS));
+app.use(cors());
 
 // подключаем роутер
 app.use('/', movieRouter);
